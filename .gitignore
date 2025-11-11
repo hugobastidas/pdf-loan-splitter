@@ -205,3 +205,21 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project specific - PDF Classifier
+storage/input/*
+storage/output/*
+!storage/input/.gitkeep
+!storage/output/.gitkeep
+
+# Docker
+docker-compose.override.yml
+
+# Database
+db/
+*.db
+*.sql
+
+# Logs
+logs/
+*.log
