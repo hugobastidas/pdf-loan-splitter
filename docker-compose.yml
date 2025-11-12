@@ -1,0 +1,126 @@
+version: "3.8"
+
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: pdf_classifier_db
+    environment:
+      POSTGRES_USER: pdfuser
+      POSTGRES_PASSWORD: pdfpass
+      POSTGRES_DB: pdfdb
+      TZ: America/Guayaquil
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pdfuser -d pdfdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - pdf_network
+
+  # Redis para cola de trabajos
+  redis:
+    image: redis:7-alpine
+    container_name: pdf_classifier_redis
+    command: redis-server --appendonly yes
+    environment:
+      TZ: America/Guayaquil
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - pdf_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pdf_classifier_api
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://pdfuser:pdfpass@db:5432/pdfdb
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_ROOT: /app/storage
+      TIMEZONE: America/Guayaquil
+      TESSERACT_LANG: spa
+      TESSERACT_CMD: /usr/bin/tesseract
+      BLANK_PAGE_THRESHOLD: "0.98"
+      PDF_DPI: "300"
+      JOB_TIMEOUT: "3600"
+      MAX_UPLOAD_SIZE: "104857600"  # 100MB
+      LOG_LEVEL: INFO
+      TZ: America/Guayaquil
+    volumes:
+      - ./storage:/app/storage
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - pdf_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Worker RQ
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: pdf_classifier_worker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://pdfuser:pdfpass@db:5432/pdfdb
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_ROOT: /app/storage
+      TIMEZONE: America/Guayaquil
+      TESSERACT_LANG: spa
+      TESSERACT_CMD: /usr/bin/tesseract
+      BLANK_PAGE_THRESHOLD: "0.98"
+      PDF_DPI: "300"
+      JOB_TIMEOUT: "3600"
+      LOG_LEVEL: INFO
+      TZ: America/Guayaquil
+    volumes:
+      - ./storage:/app/storage
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    networks:
+      - pdf_network
+    # Escalar workers si es necesario
+    deploy:
+      replicas: 2
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  pdf_network:
+    driver: bridge
