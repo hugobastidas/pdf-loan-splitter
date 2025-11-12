@@ -194,7 +194,8 @@ pdf-loan-splitter/
 │   │       └── models.py        # Modelos SQLAlchemy
 │   ├── Dockerfile               # Dockerfile del API
 │   ├── Dockerfile.worker        # Dockerfile del worker
-│   └── requirements.txt         # Dependencias Python
+│   ├── Pipfile                 # Dependencias Python
+│   └── Pipfile.lock            # Lock file de dependencias
 ├── storage/
 │   ├── input/                   # PDFs subidos
 │   └── output/                  # PDFs procesados
@@ -315,9 +316,12 @@ make up
 ### Ejecutar sin Docker
 
 ```bash
+# Instalar Pipenv
+pip install pipenv
+
 # Instalar dependencias
 cd backend
-pip install -r requirements.txt
+pipenv install --dev
 
 # Configurar variables de entorno
 export DATABASE_URL="postgresql://pdfuser:pdfpass@localhost:5432/pdfdb"

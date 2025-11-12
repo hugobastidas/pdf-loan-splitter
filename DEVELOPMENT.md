@@ -40,13 +40,15 @@ sudo apt-get install -y \
     postgresql-16 \
     redis-server
 
-# Crear entorno virtual
-python3.11 -m venv venv
-source venv/bin/activate
+# Instalar Pipenv
+pip install --user pipenv
 
-# Instalar dependencias Python
+# Instalar dependencias Python con Pipenv
 cd backend
-pip install -r requirements.txt
+pipenv install --dev
+
+# Activar entorno virtual
+pipenv shell
 ```
 
 **Configurar servicios:**

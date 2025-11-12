@@ -11,7 +11,9 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    PIPENV_VENV_IN_PROJECT=1 \
+    PIPENV_CUSTOM_VENV_NAME=.venv
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -35,12 +37,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar requirements
-COPY requirements.txt .
-
-# Instalar dependencias de Python
+# Instalar pipenv
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install -r requirements.txt
+    pip install pipenv
+
+# Copiar Pipfile y Pipfile.lock
+COPY Pipfile Pipfile.lock* ./
+
+# Instalar dependencias con pipenv
+RUN pipenv install --system --deploy --ignore-pipfile
 
 # Copiar código de la aplicación
 COPY app/ ./app/

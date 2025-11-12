@@ -1,0 +1,63 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+# FastAPI y servidor
+fastapi = "==0.109.0"
+uvicorn = {extras = ["standard"], version = "==0.27.0"}
+python-multipart = "==0.0.6"
+
+# Procesamiento de PDF
+pymupdf = "==1.23.26"
+pdf2image = "==1.17.0"
+pypdf = "==4.0.1"
+
+# Procesamiento de imágenes
+pillow = "==10.2.0"
+opencv-python = "==4.9.0.80"
+
+# OCR y código de barras
+pytesseract = "==0.3.10"
+pyzbar = "==0.1.9"
+
+# Base de datos
+sqlalchemy = "==2.0.25"
+psycopg2-binary = "==2.9.9"
+alembic = "==1.13.1"
+
+# Redis y procesamiento asíncrono
+redis = "==5.0.1"
+rq = "==1.16.1"
+
+# Configuración
+python-dotenv = "==1.0.0"
+pydantic = "==2.5.3"
+pydantic-settings = "==2.1.0"
+
+# Utilidades
+python-dateutil = "==2.8.2"
+pytz = "==2024.1"
+
+# Logging
+structlog = "==24.1.0"
+
+[dev-packages]
+# Testing
+pytest = "==7.4.3"
+pytest-cov = "==4.1.0"
+pytest-asyncio = "==0.21.1"
+httpx = "==0.26.0"
+
+# Linting y formateo
+black = "==24.1.1"
+ruff = "==0.1.13"
+mypy = "==1.8.0"
+
+# Debugging
+ipdb = "==0.13.13"
+ipython = "==8.20.0"
+
+[requires]
+python_version = "3.11"
